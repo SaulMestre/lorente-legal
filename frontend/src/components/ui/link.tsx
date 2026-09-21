@@ -1,0 +1,6 @@
+import Link from "next/link";
+import type { ComponentProps } from "react";
+
+export function SiteLink({ className = "", ...props }: ComponentProps<typeof Link>) {
+  return <Link className={`underline decoration-copper underline-offset-4 hover:text-copper ${className}`} {...props} />;
+}
