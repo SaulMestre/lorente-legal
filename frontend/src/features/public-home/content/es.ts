@@ -1,6 +1,5 @@
 export const homeContent = {
   hero: {
-    eyebrow: "Lorente Legal",
     title: "Asesoramiento jurídico cercano y claro",
     description: "Un despacho jurídico para acompañarte con rigor en decisiones importantes.",
     primaryAction: "Conoce nuestros servicios",

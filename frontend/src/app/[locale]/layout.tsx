@@ -1,7 +1,20 @@
 import type { Metadata } from "next";
+import { Cormorant_Garamond, DM_Sans } from "next/font/google";
 import { notFound } from "next/navigation";
 import { isPublishedLocale, plannedLocales } from "@/lib/i18n/locale-config";
 import "../globals.css";
+
+const displayFont = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-display",
+});
+
+const bodyFont = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-body",
+});
 
 export function generateStaticParams() {
   return plannedLocales.filter((locale) => locale === "es").map((locale) => ({ locale }));
@@ -25,5 +38,5 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  return <html lang={locale}><body>{children}</body></html>;
+  return <html lang={locale} className={`${displayFont.variable} ${bodyFont.variable}`}><body>{children}</body></html>;
 }

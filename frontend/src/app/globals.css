@@ -26,8 +26,21 @@ a {
 }
 
 :focus-visible {
-  outline: 3px solid #b56d45;
+  outline: 3px solid #6d907b;
   outline-offset: 4px;
+}
+
+.button-interactive {
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease, color 180ms ease;
+}
+
+.button-interactive:hover {
+  transform: scale(1.035);
+  box-shadow: 0 8px 22px rgb(23 33 31 / 16%);
+}
+
+.button-interactive:active {
+  transform: scale(0.98);
 }
 
 @keyframes reveal-up {

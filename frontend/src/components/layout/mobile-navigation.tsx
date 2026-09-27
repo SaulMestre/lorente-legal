@@ -9,7 +9,7 @@ export function MobileNavigation() {
 
   return (
     <div className="lg:hidden">
-      <button type="button" aria-expanded={isOpen} aria-controls="mobile-navigation" onClick={() => setIsOpen((value) => !value)} className="min-h-11 rounded-full border border-moss px-4 text-sm font-semibold text-moss">
+      <button type="button" aria-expanded={isOpen} aria-controls="mobile-navigation" onClick={() => setIsOpen((value) => !value)} className="button-interactive min-h-11 rounded-xl border border-moss px-4 text-sm font-semibold text-moss hover:bg-moss hover:text-white">
         {isOpen ? "Cerrar menú" : "Abrir menú"}
       </button>
       {isOpen ? (

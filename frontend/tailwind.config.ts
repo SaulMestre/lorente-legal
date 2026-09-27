@@ -7,9 +7,9 @@ const config: Config = {
       colors: {
         ink: "#17211f",
         moss: "#315c50",
+        sage: "#6d907b",
         paper: "#f7f5ef",
-        sand: "#e8dfcf",
-        copper: "#b56d45",
+        sand: "#e5ede7",
       },
       fontFamily: {
         sans: ["var(--font-body)"],
