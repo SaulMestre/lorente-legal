@@ -1,6 +1,18 @@
-import { SiteLink } from "@/components/ui/link";
+import { PageContainer } from "@/components/layout/page-container";
+import { PageSection } from "@/components/layout/page-section";
+import { ButtonLink } from "@/components/ui/button-link";
 import { homeContent } from "../content/es";
 
 export function ContactCallToAction() {
-  return <section className="py-20 sm:py-28"><div className="motion-reveal mx-auto flex max-w-6xl flex-col gap-6 px-5 sm:px-8 md:flex-row md:items-end md:justify-between"><div><h2 className="font-display text-4xl sm:text-5xl">{homeContent.contact.title}</h2><p className="mt-4 max-w-xl text-lg text-ink/70">{homeContent.contact.body}</p></div><SiteLink href={homeContent.contact.path} className="button-interactive inline-flex min-h-11 items-center rounded-xl bg-moss px-5 py-3 font-semibold text-white no-underline hover:bg-sage">{homeContent.contact.action}</SiteLink></div></section>;
+  return (
+    <PageSection>
+      <PageContainer className="motion-reveal flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h2 className="font-display text-heading sm:text-heading-lg">{homeContent.contact.title}</h2>
+          <p className="mt-4 max-w-xl text-lg text-ink/70">{homeContent.contact.body}</p>
+        </div>
+        <ButtonLink href={homeContent.contact.path}>{homeContent.contact.action}</ButtonLink>
+      </PageContainer>
+    </PageSection>
+  );
 }

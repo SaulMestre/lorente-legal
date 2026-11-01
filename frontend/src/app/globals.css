@@ -43,6 +43,13 @@ a {
   transform: scale(0.98);
 }
 
+.button-interactive:disabled,
+.button-interactive[aria-disabled="true"] {
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
 @keyframes reveal-up {
   from {
     opacity: 0;

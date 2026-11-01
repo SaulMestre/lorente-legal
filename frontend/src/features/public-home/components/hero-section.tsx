@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { SiteLink } from "@/components/ui/link";
+import { ButtonLink } from "@/components/ui/button-link";
 import { HeroBackgroundVideo } from "./hero-background-video";
 import { navigationEs } from "../content/navigation-es";
 import { homeContent } from "../content/es";
@@ -23,6 +23,7 @@ export function HeroSection() {
                   alt="Logotipo de Lorente Legal"
                   className="h-20 w-20 object-contain"
                   height={1254}
+                  loading="eager"
                   sizes="80px"
                   src="/images/logo_transparent.png"
                   width={1254}
@@ -49,27 +50,29 @@ export function HeroSection() {
                   </ul>
                 </nav>
               </details>
-              <SiteLink
-                className="button-interactive flex h-24 items-center bg-sage px-5 text-sm font-semibold text-white no-underline hover:bg-white hover:text-moss sm:px-7"
+              <ButtonLink
+                className="!rounded-none h-24 px-5 py-0 sm:px-7"
+                variant="secondary"
                 href={homeContent.contact.path}
               >
                 Contacto
-              </SiteLink>
+              </ButtonLink>
             </div>
           </div>
 
           <div className="flex items-end justify-between gap-8 pb-2">
             <div className="max-w-3xl">
-              <h1 className="max-w-3xl font-display text-5xl leading-[0.98] sm:text-6xl xl:text-7xl">
+              <h1 className="max-w-3xl font-display text-display sm:text-display-lg xl:text-display-xl">
                 {homeContent.hero.title}
               </h1>
               <p className="mt-5 max-w-xl text-lg text-paper/85">{homeContent.hero.description}</p>
-              <SiteLink
-                className="button-interactive mt-7 inline-flex min-h-11 items-center rounded-xl bg-sage px-5 py-3 font-semibold text-white no-underline hover:bg-white hover:text-moss"
+              <ButtonLink
+                className="mt-7"
+                variant="secondary"
                 href={homeContent.hero.primaryPath}
               >
                 {homeContent.hero.primaryAction}
-              </SiteLink>
+              </ButtonLink>
             </div>
             <a className="mb-2 hidden shrink-0 items-center gap-3 text-xs font-semibold uppercase tracking-[0.16em] text-paper no-underline xl:flex" href="#home-introduction">
               Desplázate para explorar
@@ -93,6 +96,7 @@ export function HeroSection() {
               alt="Logotipo de Lorente Legal"
               className="h-20 w-20 object-contain"
               height={1254}
+              loading="eager"
               sizes="80px"
               src="/images/logo_transparent.png"
               width={1254}
@@ -119,12 +123,13 @@ export function HeroSection() {
               </ul>
             </nav>
           </details>
-          <SiteLink
-            className="button-interactive flex h-24 w-[30%] items-center justify-center bg-sage px-2 text-xs font-semibold text-white no-underline hover:bg-white hover:text-moss sm:text-sm"
+          <ButtonLink
+            className="!rounded-none h-24 w-[30%] justify-center px-2 py-0 text-xs sm:text-sm"
+            variant="secondary"
             href={homeContent.contact.path}
           >
             Contacto
-          </SiteLink>
+          </ButtonLink>
         </div>
         <a className="absolute bottom-10 flex flex-col items-center gap-3 text-xs font-semibold uppercase tracking-[0.16em] text-paper no-underline" href="#home-introduction">
           Desplázate para explorar
