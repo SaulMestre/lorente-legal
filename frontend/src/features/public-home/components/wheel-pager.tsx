@@ -13,7 +13,7 @@ const DURATION = 0.9;
 const ROTATION = 70;
 const EASE: [number, number, number, number] = [0.65, 0, 0.35, 1];
 const WHEEL_GAP_MS = 120;
-const SWIPE_THRESHOLD = 60;
+const SWIPE_THRESHOLD = 40;
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 function subscribeReducedMotion(onChange: () => void) {
@@ -50,7 +50,8 @@ export function WheelPager({ sections }: { sections: WheelSection[] }) {
     let locked = false;
     let lastWheel = 0;
     let touchStartY = 0;
-    let touchStartScroll = 0;
+    let touchLastY = 0;
+    let touchStartEdges = { top: true, bottom: true };
     let unlockTimer: number | undefined;
 
     const announce = (index: number) =>
@@ -75,14 +76,16 @@ export function WheelPager({ sections }: { sections: WheelSection[] }) {
       to.scrollTop = direction > 0 ? 0 : to.scrollHeight;
       to.style.visibility = "visible";
       const options = { duration: DURATION, ease: EASE };
-      animate(from, { y: ["0%", `${-direction * 100}%`], rotateX: [0, direction * ROTATION], opacity: [1, 0] }, options);
-      animate(to, { y: [`${direction * 100}%`, "0%"], rotateX: [-direction * ROTATION, 0], opacity: [0, 1] }, options).then(() => {
+      const finish = () => {
+        window.clearTimeout(unlockTimer);
         resetPanel(from, false);
         resetPanel(to, true);
-        unlockTimer = window.setTimeout(() => {
-          locked = false;
-        }, 100);
-      });
+        locked = false;
+      };
+      // Fallback so the lock can never stay stuck if a mobile browser drops the animation.
+      unlockTimer = window.setTimeout(finish, DURATION * 1000 + 300);
+      animate(from, { y: ["0%", `${-direction * 100}%`], rotateX: [0, direction * ROTATION], opacity: [1, 0] }, options);
+      animate(to, { y: [`${direction * 100}%`, "0%"], rotateX: [-direction * ROTATION, 0], opacity: [0, 1] }, options).then(finish, finish);
     };
 
     const step = (direction: Direction) => go((current + direction + count) % count, direction);
@@ -105,18 +108,20 @@ export function WheelPager({ sections }: { sections: WheelSection[] }) {
     };
 
     const onTouchStart = (event: TouchEvent) => {
-      touchStartY = event.touches[0].clientY;
-      touchStartScroll = panels[current].scrollTop;
+      touchStartY = touchLastY = event.touches[0].clientY;
+      touchStartEdges = { top: !canScroll(panels[current], -1), bottom: !canScroll(panels[current], 1) };
     };
 
-    const onTouchEnd = (event: TouchEvent) => {
-      const delta = touchStartY - event.changedTouches[0].clientY;
+    const onTouchMove = (event: TouchEvent) => {
+      touchLastY = event.touches[0].clientY;
+    };
+
+    // Edges are read at touch start so momentum scrolling after the finger lifts can't block the change.
+    const onTouchEnd = () => {
+      const delta = touchStartY - touchLastY;
       if (Math.abs(delta) < SWIPE_THRESHOLD) return;
       const direction: Direction = delta > 0 ? 1 : -1;
-      const panel = panels[current];
-      // A swipe that scrolled the panel content must not also change section.
-      if (panel.scrollTop !== touchStartScroll || canScroll(panel, direction)) return;
-      step(direction);
+      if (direction > 0 ? touchStartEdges.bottom : touchStartEdges.top) step(direction);
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -153,6 +158,7 @@ export function WheelPager({ sections }: { sections: WheelSection[] }) {
 
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
     window.addEventListener("touchend", onTouchEnd, { passive: true });
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("hashchange", onHashChange);
@@ -162,6 +168,7 @@ export function WheelPager({ sections }: { sections: WheelSection[] }) {
       window.clearTimeout(unlockTimer);
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("hashchange", onHashChange);
