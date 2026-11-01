@@ -72,6 +72,16 @@ a {
   }
 }
 
+html[data-pager="on"],
+html[data-pager="on"] body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html[data-pager="on"] .motion-reveal {
+  animation: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

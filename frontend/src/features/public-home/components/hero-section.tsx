@@ -8,10 +8,10 @@ import { homeContent } from "../content/es";
 export function HeroSection() {
   return (
     <>
-      <section className="relative isolate hidden min-h-[min(760px,100svh)] overflow-hidden bg-moss text-paper lg:block">
+      <section className="relative isolate hidden min-h-[100svh] overflow-hidden bg-moss text-paper lg:block">
         <HeroBackgroundVideo device="desktop" />
         <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-ink/35 via-ink/25 to-ink/75" />
-        <div className="relative mx-auto flex min-h-[min(760px,100svh)] max-w-7xl flex-col justify-between px-6 py-10 sm:px-10 lg:px-14 lg:py-14">
+        <div className="relative mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-between px-6 py-10 sm:px-10 lg:px-14 lg:py-14">
           <div className="flex justify-center pt-8 sm:pt-12">
             <div className="flex items-stretch shadow-2xl shadow-ink/25">
               <Link
