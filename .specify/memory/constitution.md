@@ -1,11 +1,12 @@
 ﻿<!--
 Sync Impact Report
-- Cambio de versión: 1.14.0 -> 1.15.0
-- Principios y secciones modificados:
-   - Principio II y Principio IV: Vinculación explícita con las nuevas secciones "Cookies, analítica y servicios de terceros" e "Internacionalización y arquitectura multidioma".
-  - Se añade Sección "Cookies, analítica y servicios de terceros": 10 párrafos/reglas normativas que establecen los principios de privacidad por diseño y minimización de datos, activación de cookies no esenciales exclusivamente tras obtener consentimiento legal previo sin bloquear funcionalidades básicas ante el rechazo, evaluación estricta de servicios externos (analítica, publicidad, seguimiento, mapas, vídeo, chat, redes sociales, widgets), optimización y carga centralizada de scripts de terceros minimizando su impacto en Core Web Vitals, clasificación diferenciada de categorías de cookies/servicios para la gestión del consentimiento con capacidad de revocación/modificación, prohibición estricta de enviar datos jurídicos, documentos, credenciales o información personal sensible a herramientas de analítica/seguimiento, gestión centralizada de claves/configuraciones de terceros sin exponer secretos al navegador, y la delimitación explícita de que la Constitución fija las reglas transversales de privacidad mientras que la elección de proveedores concretos (consentimiento o analítica) se decidirá en las especificaciones correspondientes.
-- Se añade Sección "Internacionalización y arquitectura multidioma": 23 subsecciones sobre locales es/en/ca, rutas localizadas, slugs traducibles, código compartido, contenido editorial independiente, selección y persistencia de idioma, selector accesible, SEO multidioma, sitemap, canonicalización, revisión humana de contenido jurídico traducido, formatos locales, errores localizados, fallbacks, accesibilidad, tecnología centralizada y publicación progresiva.
-- TODOs: confirmar la fecha original de ratificación
+- Cambio de versión: 1.15.0 -> 2.0.0 (MAJOR: sustituye el requisito de API ejecutable independiente).
+- Motivo: la plataforma reutilizará el backend real de Lorente Legal Desk como host único ASP.NET Core con Blazor Interactive Server y Minimal APIs.
+- Se actualizan los Principios I y III, la comunicación HTTP y las limitaciones de exportación estática de Next.js.
+- El monorepo es una decisión de organización del código, no implica desplegar todas las aplicaciones juntas.
+- Se conserva el resto de reglas de privacidad, SEO, internacionalización, diseño, estado y calidad.
+- La exportación estática de la web aún está pendiente de verificar: la redirección de / es incompatible con output: export tal como está implementada.
+- Pendiente: confirmar fecha de ratificación original; migración al monorepo cuando Desk esté disponible en GitHub.
 -->
 
 # Constitución de Lorente Legal
@@ -13,10 +14,13 @@ Sync Impact Report
 ## Principios fundamentales
 
 ### I. Separación arquitectónica y fuente única de verdad
-Lorente Legal DEBE componerse de dos aplicaciones independientes: un frontend desarrollado
-en Next.js, React, TypeScript y Tailwind CSS, y un backend desarrollado en ASP.NET Core
-Web API (.NET 10) en C#. El backend DEBE ser la única fuente de verdad para los datos y
-las reglas de negocio; la lógica de negocio NO DEBE implementarse en el frontend. El sistema
+La plataforma Lorente Legal DEBE separar sus aplicaciones y sus despliegues:
+- **Web pública**: Next.js, React, TypeScript y Tailwind CSS, con preferencia por exportación estática mientras sea viable.
+- **Lorente Legal Desk**: aplicación interna Blazor Web App Interactive Server (.NET 10), cuyo único host ejecutable, `LauraLegal.Web`, también expondrá los endpoints HTTP necesarios mediante Minimal APIs.
+- **Chatbot futuro**: aplicación o servicio independiente cuando se defina; NO DEBE desarrollarse ni alojarse anticipadamente.
+
+La web pública consumirá los contratos HTTP del mismo backend de Desk; NO DEBE crearse por defecto un nuevo ejecutable `LorenteLegal.Api` ni duplicarse la lógica de negocio.
+El backend de Desk DEBE ser la fuente de verdad para datos y reglas de negocio. El frontend público NO DEBE implementar lógica de negocio ni acceder directamente a PostgreSQL. El sistema
 se desarrollará progresivamente en dos fases bien definidas:
 - **Fase 1 (Presencia y Captación)**: Construcción de la web pública estática optimizada
   para SEO, rendimiento y captación de clientes.
@@ -30,8 +34,8 @@ mensajería, WhatsApp, pagos, base de datos ni workflows jurídicos salvo que un
 aprobada los requiera expresamente. La arquitectura DEBE estar preparada para incorporarlos
 posteriormente sin obligar a implementar infraestructura no utilizada.
 
-El proyecto DEBE mantenerse como un monolito modular y NO DEBEN introducirse microservicios
-salvo necesidad técnica demostrada.
+El backend de Desk DEBE evolucionar como monolito modular, manteniendo un solo host ASP.NET Core; NO DEBEN introducirse microservicios salvo necesidad técnica demostrada.
+El futuro monorepo agrupará el código de las aplicaciones sin exigir procesos, dominios o despliegues compartidos. Hasta su migración se conservarán los repositorios y sus despliegues actuales.
 
 ### II. Frontend tipado, accesible y orientado a la presentación
 El frontend DEBE utilizar Next.js App Router, React, TypeScript en modo estricto y Tailwind
@@ -88,37 +92,32 @@ Estas rutas representan la estructura funcional inicial. Los slugs finales podr�
 posteriormente por razones de SEO dentro de una especificación concreta.
 
 ### III. Dominio protegido y aplicación explícita
-El backend DEBE estructurarse en una arquitectura limpia orientada al dominio dentro de
-la solución `.NET 10`:
+El backend central existente es `LauraLegal.sln`, que conserva la siguiente arquitectura:
+
 ```text
 src/
-  LorenteLegal.Domain
-  LorenteLegal.Application
-  LorenteLegal.Infrastructure
-  LorenteLegal.Api
+  LauraLegal.Domain/
+  LauraLegal.Application/
+  LauraLegal.Infrastructure/
+  LauraLegal.Web/           # Único host: Blazor Interactive Server + Minimal APIs
+tests/
+  LauraLegal.Tests/
 ```
-La dirección conceptual de dependencias DEBE ser estrictamente:
+
+Las referencias y responsabilidades DEBEN respetar esta dirección conceptual:
+
 ```text
-Api -> Application -> Domain
-Infrastructure -> Application / Domain
+LauraLegal.Web -> LauraLegal.Application -> LauraLegal.Domain
+LauraLegal.Infrastructure -> LauraLegal.Application / LauraLegal.Domain
 ```
-Como única excepción, `LorenteLegal.Api` PODRÁ referenciar `LorenteLegal.Infrastructure` exclusivamente
-desde el Composition Root para:
-- registrar implementaciones en el contenedor de dependencias (DI)
-- registrar DbContext
-- registrar repositorios
-- registrar proveedores externos
-- configurar Infrastructure e iniciar la aplicación (ej. `builder.Services.AddInfrastructure(configuration);`)
 
-Esta referencia de bootstrapping NO autoriza a los controladores o endpoints de `Api` a utilizar directamente
-repositorios concretos, DbContext, implementaciones de Infrastructure, proveedores externos, almacenamiento de archivos
-ni clientes de APIs externas. Los controladores y endpoints DEBEN seguir dependiendo únicamente de `Application` para
-ejecutar casos de uso.
+`LauraLegal.Web` PODRÁ referenciar `LauraLegal.Infrastructure` únicamente desde el Composition Root para registrar DI, DbContext, almacenamiento, integraciones y ejecutar el host. Los endpoints HTTP y componentes Blazor DEBEN reutilizar operaciones de `Application`; NO DEBEN duplicar reglas de negocio ni usar directamente DbContext o implementaciones concretas de Infrastructure.
 
-`Domain` NO DEBE depender de `Application`, `Infrastructure`, `Api`, Entity Framework Core, ASP.NET Core, PostgreSQL
-ni APIs externas. Las entidades de dominio DEBEN proteger sus invariantes y no exponer setters públicos sin
-justificación. Los conceptos de negocio DEBEN expresarse mediante Value Objects cuando corresponda. Cada operación
-significativa DEBE ser un caso de uso explícito en `Application`. `Application` NO DEBE depender de `Infrastructure`.
+La presentación Blazor DEBE continuar utilizando servicios .NET mediante DI. NO DEBE convertirse en cliente HTTP de su propio host por el mero hecho de exponer una API externa.
+
+`Domain` NO DEBE depender de `Application`, `Infrastructure`, `Web`, EF Core, ASP.NET Core ni proveedores externos. `Application` NO DEBE depender de `Infrastructure`. Las entidades de dominio DEBEN proteger sus invariantes. Las nuevas funcionalidades DEBEN organizarse por módulo funcional, evitando ampliar indefinidamente interfaces generalistas; NO DEBEN refactorizarse módulos existentes sin una necesidad demostrada.
+
+Los contratos y rutas HTTP DEBEN publicarse únicamente cuando existan operaciones reales y políticas de autorización apropiadas. Para la integración con la web pública se utilizarán contratos OpenAPI generados desde los endpoints de este mismo host, sin crear un segundo servidor.
 
 ### IV. Seguridad, privacidad y control del acceso
 Toda operación protegida DEBE autenticarse y autorizarse en el backend; la seguridad NO DEBE
@@ -276,6 +275,10 @@ NO DEBE crearse un archivo genérico como `global-store.ts`, `app-store.ts` o `s
 ## Estrategia de renderizado y componentes del frontend
 
 El frontend utiliza Next.js con App Router.
+
+### Condición de despliegue estático
+La web pública DEBE priorizar su publicación como sitio estático en Render cuando la funcionalidad y la compilación sean compatibles. La exportación estática requiere `output: "export"`, rutas generables en build y ausencia de funciones que dependan de un servidor Next.js en ejecución (por ejemplo, `redirect()` en la ruta raíz, Server Actions, cookies de petición o proxies/rewrite dinámicos).
+Esta decisión NO significa que la web ya esté exportada: antes de activar dicha opción DEBE corregirse la redirección actual de `src/app/page.tsx`, ejecutarse `npm ci && npm run build` y validarse la navegación, SEO y recursos estáticos. Hasta completar esa verificación NO se modificarán automáticamente el modo de despliegue ni los dominios de producción.
 Los Server Components DEBEN ser la opción por defecto.
 Los Client Components SOLO deben utilizarse cuando exista una necesidad técnica concreta definida en esta sección.
 
@@ -525,7 +528,7 @@ El backend será la fuente de verdad de los datos, reglas de negocio, validacion
 El frontend NO DEBE acceder directamente a PostgreSQL, almacenamiento de documentos, servicios de WhatsApp, correo, APIs jurídicas externas, proveedores de IA ni ningún recurso de infraestructura; toda comunicación DEBE pasar por ASP.NET Core.
 
 ### 1. Contrato de la API
-ASP.NET Core DEBE exponer un contrato OpenAPI. El contrato OpenAPI será la fuente de verdad para los contratos HTTP entre frontend y backend.
+Cuando se incorporen operaciones HTTP de negocio al host `LauraLegal.Web`, ASP.NET Core DEBE exponer su contrato OpenAPI. Dicho contrato será la fuente de verdad para los tipos HTTP entre la web pública y Desk. No se generan contratos ficticios antes de disponer de endpoints reales.
 El flujo obligatorio para lectura y uso de datos DEBE ser:
 ```text
 ASP.NET Core -> OpenAPI -> Tipos TypeScript generados -> API Client -> Server Components / TanStack Query -> Componentes React
@@ -539,14 +542,14 @@ Las llamadas HTTP NO DEBEN realizarse directamente dentro de componentes React. 
 Se utilizará `fetch` nativo como cliente HTTP. Axios NO DEBE añadirse salvo que exista una necesidad técnica concreta que `fetch` no pueda resolver adecuadamente. Debe existir una capa común encargada de URL base, headers comunes, serialización/deserialización JSON, autenticación, tratamiento de errores, timeouts, cancelación y trazabilidad.
 
 ### 4. Cliente de servidor y cliente de navegador
-DEBEN existir dos formas explícitas de acceder a la API:
-- **Server API Client**: para Server Components, código ejecutado exclusivamente en servidor y Server Actions.
-- **Browser API Client**: para Client Components, TanStack Query, formularios interactivos y mutations en navegador.
+Se distinguen dos formas de acceder a la API según el despliegue real:
+- **Browser API Client**: para Client Components, TanStack Query, formularios interactivos y operaciones HTTP desde el navegador; debe utilizar únicamente contratos y endpoints públicos o autorizados para ese usuario.
+- **Server API Client**: únicamente para operaciones resueltas durante el build estático con datos públicos, o en una futura ejecución real de Next.js en servidor, si se aprueba expresamente.
 
-NO debe utilizarse Browser API Client desde Server Components ni código dependiente de `window`, `document` o APIs del navegador. NO debe utilizarse Server API Client desde código ejecutado en navegador.
+Mientras se utilice exportación estática, NO DEBEN usarse Server Actions, cookies de servidor, lectura de datos privados en tiempo de petición ni funciones que necesiten un proceso Next.js en ejecución. NO debe utilizarse Browser API Client desde Server Components ni Server API Client desde el navegador.
 
 ### 5. Variables de entorno
-La URL del backend NO DEBE escribirse directamente en el código; DEBE obtenerse mediante configuración (ej. `API_BASE_URL`). Las variables utilizadas exclusivamente por el servidor NO deben llevar el prefijo `NEXT_PUBLIC_`. Solo las variables públicas conocidas por el navegador pueden llevar `NEXT_PUBLIC_`; los secretos NUNCA deben llevar este prefijo.
+La URL del backend NO DEBE escribirse directamente en el código; DEBE obtenerse mediante configuración. En una exportación estática, la URL utilizada desde el navegador será pública (por ejemplo, `NEXT_PUBLIC_API_BASE_URL`) y se fijará durante el build. Las variables privadas sin `NEXT_PUBLIC_` solo estarán disponibles en un build o en un servidor Next.js real; NO constituyen secretos en tiempo de ejecución del sitio estático. Los secretos NUNCA deben incluir el prefijo `NEXT_PUBLIC_` ni incorporarse al bundle.
 
 ### 6. Requests
 Las funciones de API DEBEN representar operaciones concretas (ej. `getClients()`, `getClientById(id)`, `createClient(request)`). NO deben crearse funciones genéricas ambiguas como `request()`, `execute()` o `callApi()` salvo para el cliente HTTP interno de bajo nivel.
@@ -597,7 +600,7 @@ Las peticiones autenticadas desde el navegador DEBEN enviar credenciales seguras
 El backend DEBE permitir únicamente los orígenes frontend necesarios. En producción NO debe utilizarse `Access-Control-Allow-Origin: *` para endpoints autenticados.
 
 ### 22. Server Components y Server API Client
-Los Server Components obtendrán datos directamente a través del Server API Client. NO se utilizará TanStack Query para datos que solo se necesiten durante el renderizado del servidor.
+Los Server Components podrán obtener datos públicos mediante Server API Client durante la generación estática o datos permitidos desde un servidor Next.js cuando tal infraestructura exista. En un sitio exportado, NO podrán consultar en tiempo real datos privados o específicos de una petición entrante. NO se utilizará TanStack Query para datos disponibles exclusivamente durante el build.
 
 ### 23. Datos sensibles
 Todo dato devuelto por la API se considera visible para el usuario. El backend deberá crear DTOs específicos para evitar enviar propiedades que no deban exponerse; el frontend NO debe recibir datos sensibles para luego ocultarlos desde React.
@@ -1033,7 +1036,7 @@ La herramienta concreta de analítica, consentimiento o servicios de terceros se
 
 ## Restricciones técnicas y de seguridad
 
-El backend DEBE utilizar .NET 10, ASP.NET Core, C#, Entity Framework Core y PostgreSQL.
+El backend `LauraLegal.Web` DEBE utilizar .NET 10, ASP.NET Core, C# y Entity Framework Core. PostgreSQL será el proveedor de base de datos en producción; SQLite podrá mantenerse en el entorno local según el diseño actual de Desk.
 El acceso a la base de datos DEBE realizarse desde `Infrastructure` y las migraciones DEBEN
 estar versionadas en el repositorio. La integración con servicios externos (WhatsApp, email,
 almacenamiento de objetos, proveedores de pago o IA) DEBE realizarse mediante abstracciones
@@ -1057,4 +1060,4 @@ Impact Report), motivo del cambio y ajuste de versión según SemVer (MAJOR para
 incompatibles, MINOR para ampliación de directrices o principios, PATCH para correcciones o
 aclaraciones).
 
-**Versión**: 1.15.0 | **Ratificada**: TODO(RATIFICATION_DATE): confirmar fecha original | **Última enmienda**: 2026-09-21
+**Versión**: 2.0.0 | **Ratificada**: TODO(RATIFICATION_DATE): confirmar fecha original | **Última enmienda**: 2026-11-02
