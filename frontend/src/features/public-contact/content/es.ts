@@ -1,0 +1,57 @@
+export const contactContent = {
+  hero: {
+    title: "Hablemos de tu caso",
+    body: "Cuéntame brevemente qué necesitas y vemos juntos cuál es el siguiente paso.",
+    whatsapp: "Hablar por WhatsApp",
+    phone: "Llamar",
+    email: "Enviar email",
+    note: "Escribes tú, cuando quieras y con tus palabras.",
+  },
+  form: {
+    eyebrow: "Si lo prefieres",
+    title: "O déjame tus datos",
+    body: "Te contestaré por el medio que elijas. No incluyas documentos ni datos sensibles en este primer mensaje.",
+    submit: "Enviar consulta",
+    unavailable: "Se está abriendo tu aplicación de correo con la consulta ya redactada. Revisa el mensaje y pulsa enviar desde allí. Si no se abre, escríbeme por WhatsApp o a mi email.",
+    fields: {
+      name: "Nombre y apellidos",
+      phone: "Teléfono",
+      email: "Email",
+      area: "Área de consulta",
+      message: "Mensaje",
+      channel: "Medio de contacto preferido",
+      privacy: "He leído y acepto la política de privacidad",
+    },
+    areaPlaceholder: "Selecciona un área",
+    areas: ["Extranjería", "Nacionalidad", "Familia", "Laboral", "Civil", "Otro"],
+    channels: ["WhatsApp", "Teléfono", "Email"],
+    privacyPath: "/es/privacidad",
+    errors: {
+      name: "Indica tu nombre y apellidos.",
+      phone: "Indica un teléfono válido.",
+      email: "Indica un email válido.",
+      area: "Selecciona un área de consulta.",
+      message: "Cuéntame brevemente qué necesitas.",
+      channel: "Elige cómo prefieres que te contacte.",
+      privacy: "Debes aceptar la política de privacidad para continuar.",
+    },
+  },
+  steps: {
+    title: "Qué ocurre después",
+    items: [
+      { number: "01", text: "Nos cuentas brevemente tu caso." },
+      { number: "02", text: "Laura revisa tu consulta." },
+      { number: "03", text: "Contactamos contigo para indicarte los siguientes pasos." },
+    ],
+  },
+  personal: {
+    title: "Tu consulta la atenderé personalmente.",
+    body: "Detrás de cada mensaje hay una persona, no una plataforma. Leeré lo que me cuentes y te responderé yo.",
+    imageAlt: "Laura, profesional de Lorente Legal",
+  },
+  office: {
+    title: "El despacho",
+    maps: "Cómo llegar",
+    labels: { address: "Dirección", hours: "Horario", phone: "Teléfono", email: "Email" },
+  },
+} as const;
